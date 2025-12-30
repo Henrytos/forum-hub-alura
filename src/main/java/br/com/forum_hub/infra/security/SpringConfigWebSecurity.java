@@ -13,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -29,7 +32,11 @@ public class SpringConfigWebSecurity {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(
                         http -> {
-                            http.requestMatchers("/login").permitAll()
+                            http.requestMatchers(
+                                            new String[]{
+                                                    "atualizar-token",
+                                                    "login"}
+                                    ).permitAll()
                                     .anyRequest().authenticated();
                         }
                 )

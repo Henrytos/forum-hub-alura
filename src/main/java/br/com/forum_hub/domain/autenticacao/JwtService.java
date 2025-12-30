@@ -13,13 +13,23 @@ import java.time.ZoneOffset;
 public class JwtService {
 
 
-    public String gerar(Usuario usuario) {
+    public String gerarToken(Usuario usuario) {
         Algorithm algorithm = Algorithm.HMAC256("1234");
 
         return JWT.create()
                 .withIssuer("Forum Hub")
                 .withSubject(usuario.getEmail())
                 .withExpiresAt(expiracao(30))
+                .sign(algorithm);
+    }
+
+    public String gerarRefreshToken(Usuario usuario) {
+        Algorithm algorithm = Algorithm.HMAC256("1234");
+
+        return JWT.create()
+                .withIssuer("Forum Hub")
+                .withSubject(usuario.getId().toString())
+                .withExpiresAt(expiracao(120))
                 .sign(algorithm);
     }
 
