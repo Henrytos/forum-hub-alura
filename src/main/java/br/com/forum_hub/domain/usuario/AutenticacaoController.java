@@ -31,36 +31,37 @@ public class AutenticacaoController {
 
     @PostMapping("/login")
     public ResponseEntity<DadosToken> efetuarLogin(
-            @Valid @RequestBody DadosLogin dadosLogin
+            @Valid @RequestBody DadosLogin dados
     ) {
         // objeto de autenticação não validado
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(dadosLogin.email(), dadosLogin.senha());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
 
         // objeto de autenticação validado
         Authentication authentication = this.authenticationManager.authenticate(authenticationToken);
+        Usuario usuarioLogado = (Usuario) authentication.getPrincipal();
 
         // geração token jwt
-        String token = this.jwtService.gerarToken((Usuario) authentication.getPrincipal());
+        String token = this.jwtService.gerarToken(usuarioLogado);
+        String refreshToken = (usuarioLogado.novoRefreshToken());
 
-        String refreshToken = this.jwtService.gerarRefreshToken((Usuario) authentication.getPrincipal());
+        this.usuarioRepository.save(usuarioLogado);
 
         return ResponseEntity.ok(new DadosToken(token, refreshToken));
     }
 
-
     @PostMapping("/atualizar-token")
     public ResponseEntity<DadosToken> atualizarToken(
-            @Valid @RequestBody DadosAtualizarToken dadosAtualizarToken
+            @Valid @RequestBody DadosAtualizarToken dados
     ) {
-        Long id = Long.valueOf(this.jwtService.validarToken(dadosAtualizarToken.refreshToken()));
+        Usuario usuario = usuarioRepository.findByRefreshToken(dados.refreshToken()).orElseThrow();
 
-        if (id == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-        Usuario usuario = usuarioRepository.findById(id).orElseThrow();
+        if(usuario.refreshTokenExpirado())
+            throw new RuntimeException("Token expirado");
 
         String token = this.jwtService.gerarToken(usuario);
-        String refreshToken = this.jwtService.gerarRefreshToken(usuario);
+        String refreshToken = usuario.novoRefreshToken();
+
+        this.usuarioRepository.save(usuario);
 
         return ResponseEntity.ok(new DadosToken(token, refreshToken));
     }
@@ -68,6 +69,14 @@ public class AutenticacaoController {
     @PostMapping("/logout")
     public ResponseEntity<String> efetuarLogout(Authentication authentication) {
         SecurityContextHolder.clearContext();
+
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+
+        usuario.setRefreshToken(null);
+        usuario.setExpiracaoRefreshToken(null);
+
+        this.usuarioRepository.save(usuario);
+
         return ResponseEntity.ok("Logout realizado com sucesso!");
     }
 
