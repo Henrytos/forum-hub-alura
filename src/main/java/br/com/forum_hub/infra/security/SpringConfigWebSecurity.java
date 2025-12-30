@@ -30,6 +30,8 @@ public class SpringConfigWebSecurity {
         return httpSecurity
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
+                .logout(logout -> logout.disable())
+                .formLogin(form -> form.disable())
                 .authorizeHttpRequests(
                         http -> {
                             http.requestMatchers(
