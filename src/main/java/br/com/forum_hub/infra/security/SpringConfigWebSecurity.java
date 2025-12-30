@@ -1,5 +1,6 @@
 package br.com.forum_hub.infra.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,10 +11,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SpringConfigWebSecurity {
+
+    private final TokenJwtFiltro tokenJwtFiltro;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)
@@ -22,11 +27,18 @@ public class SpringConfigWebSecurity {
         return httpSecurity
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(
+                        http -> {
+                            http.requestMatchers("/login").permitAll()
+                                    .anyRequest().authenticated();
+                        }
+                )
+                .addFilterBefore(tokenJwtFiltro, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public PasswordEncoder encriptador(){
+    public PasswordEncoder encriptador() {
         return new BCryptPasswordEncoder();
     }
 

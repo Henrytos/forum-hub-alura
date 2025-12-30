@@ -13,14 +13,33 @@ import java.time.ZoneOffset;
 public class JwtService {
 
 
-    public String gerar(Usuario usuario){
+    public String gerar(Usuario usuario) {
         Algorithm algorithm = Algorithm.HMAC256("1234");
 
         return JWT.create()
                 .withIssuer("Forum Hub")
                 .withSubject(usuario.getEmail())
-                .withExpiresAt(Instant.now().plus(Duration.ofMinutes(10)).atOffset(ZoneOffset.ofHours(3)).toInstant())
+                .withExpiresAt(expiracao(30))
                 .sign(algorithm);
+    }
+
+    public String validarToken(String token) {
+        Algorithm algorithm = Algorithm.HMAC256("1234");
+
+        try {
+            return JWT
+                    .require(algorithm)
+                    .withIssuer("Forum Hub")
+                    .build()
+                    .verify(token)
+                    .getSubject();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Instant expiracao(int tempoEmMinutos) {
+        return Instant.now().plus(Duration.ofMinutes(tempoEmMinutos)).atOffset(ZoneOffset.ofHours(3)).toInstant();
     }
 
 }
