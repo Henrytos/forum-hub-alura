@@ -36,8 +36,10 @@ public class SpringConfigWebSecurity {
                         http -> {
                             http.requestMatchers(
                                             new String[]{
-                                                    "atualizar-token",
-                                                    "login"}
+                                                    "/atualizar-token",
+                                                    "/login",
+                                                    "/registrar",
+                                            }
                                     ).permitAll()
                                     .anyRequest().authenticated();
                         }
