@@ -84,4 +84,10 @@ public class Usuario implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+
+    public void verificar() {
+        this.verificado = true;
+        this.token = null;
+        this.expiracaoToken = null;
+    }
 }
