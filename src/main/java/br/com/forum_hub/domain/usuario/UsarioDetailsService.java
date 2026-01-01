@@ -15,7 +15,7 @@ public class UsarioDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return this.usuarioRepository.findByEmailIgnoreCase(username)
+        return this.usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrue(username)
                 .orElseThrow(() -> new RegraDeNegocioException("Usuário não existe na aplicação"));
     }
 

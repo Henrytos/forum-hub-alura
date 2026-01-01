@@ -2,7 +2,6 @@ package br.com.forum_hub.domain.usuario;
 
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,7 @@ public class UsuariService {
     @Transactional
     public Usuario cadastrar(DadosCadastroUsuario dados) {
         Optional<Usuario> optionalUsuario = usuarioRepository
-                .findByEmailIgnoreCaseOrNomeUsuarioIgnoreCase(dados.email(), dados.nomeUsuario());
+                .findByEmailIgnoreCaseOrNomeUsuarioIgnoreCaseAndVerificadoTrue(dados.email(), dados.nomeUsuario());
 
         if(optionalUsuario.isPresent()){
             throw new RegraDeNegocioException("Já existe uma conta cadastrada com esse email ou nome de usuário!");

@@ -8,8 +8,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity
@@ -30,6 +32,11 @@ public class Usuario implements UserDetails {
     private String miniBiografia;
     private String biografia;
 
+    private String token;
+    private LocalDateTime expiracaoToken;
+    private Boolean verificado;
+
+
     public Usuario(DadosCadastroUsuario dados, String senhaCriptografada) {
         this.nomeCompleto = dados.nomeCompleto();
         this.email = dados.email();
@@ -37,6 +44,10 @@ public class Usuario implements UserDetails {
         this.nomeUsuario = dados.nomeUsuario();
         this.biografia = dados.biografia();
         this.miniBiografia = dados.miniBiografia();
+
+        this.token = UUID.randomUUID().toString();
+        this.expiracaoToken = LocalDateTime.now().plusMinutes(30);
+        this.verificado = false;
     }
 
     @Override

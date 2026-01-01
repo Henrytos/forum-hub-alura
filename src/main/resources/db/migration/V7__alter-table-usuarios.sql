@@ -1,0 +1,4 @@
+ALTER TABLE usuarios
+    ADD COLUMN token VARCHAR(50),
+    ADD COLUMN expiracao_token  TIMESTAMP,
+    ADD COLUMN verificado BOOLEAN NOT NULL DEFAULT 1;
