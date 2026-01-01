@@ -50,4 +50,18 @@ public class UsuariService {
             Usuario usuario = usuarioRepository.findByToken(codigo).orElseThrow();
             usuario.verificar();
     }
+
+    public void desativarUsuario(Usuario usuario) {
+
+        Usuario usuarioEncontrado = this.usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrue(usuario.getEmail()).orElseThrow();
+        usuarioEncontrado.inativar();
+
+    }
+
+    public Usuario obterPerfil(Usuario usuario) {
+
+        Usuario usuarioEncontrado = this.usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrue(usuario.getEmail()).orElseThrow();
+
+        return usuarioEncontrado;
+    }
 }

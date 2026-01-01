@@ -1,7 +1,9 @@
 package br.com.forum_hub.domain.usuario;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -17,7 +19,7 @@ public class UsuarioController {
 
 
     @PostMapping("/registrar")
-    public ResponseEntity<DadosListagemUsuario> cadastrar(@RequestBody @Valid DadosCadastroUsuario dados, UriComponentsBuilder uriBuilder){
+    public ResponseEntity<DadosListagemUsuario> cadastrar(@RequestBody @Valid DadosCadastroUsuario dados, UriComponentsBuilder uriBuilder) {
         var usuario = usuarioService.cadastrar(dados);
         var uri = uriBuilder.path("/{nomeUsuario}").buildAndExpand(usuario.getNomeUsuario()).toUri();
         return ResponseEntity.created(uri).body(new DadosListagemUsuario(usuario));
@@ -28,11 +30,31 @@ public class UsuarioController {
     @GetMapping("/verificar-conta")
     public ResponseEntity<String> verficiarEmail(
             @RequestParam String codigo
-            ){
+    ) {
 
         usuarioService.verificarEmail(codigo);
         return ResponseEntity.ok("Conta verificada com sucesso!");
 
+    }
+
+    @Transactional
+    @DeleteMapping("/desativar")
+    public ResponseEntity desativarConta(
+            @AuthenticationPrincipal Usuario usuario
+    ) {
+        this.usuarioService.desativarUsuario(usuario);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Transactional
+    @GetMapping("/perfil")
+    public ResponseEntity perfil(
+            @AuthenticationPrincipal Usuario usuario
+    ) {
+        Usuario usuarioEncontrado = this.usuarioService.obterPerfil(usuario);
+
+        return ResponseEntity.ok().body(new DadosListagemUsuario(usuarioEncontrado));
     }
 
 }

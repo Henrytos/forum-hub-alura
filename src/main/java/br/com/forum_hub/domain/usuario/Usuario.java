@@ -90,4 +90,8 @@ public class Usuario implements UserDetails {
         this.token = null;
         this.expiracaoToken = null;
     }
+
+    public void inativar() {
+        this.verificado = false;
+    }
 }
