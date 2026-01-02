@@ -3,6 +3,7 @@ package br.com.forum_hub.domain.usuario;
 import br.com.forum_hub.infra.email.EmailService;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.transaction.Transactional;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class UsuariService {
         Optional<Usuario> optionalUsuario = usuarioRepository
                 .findByEmailIgnoreCaseOrNomeUsuarioIgnoreCaseAndVerificadoTrue(dados.email(), dados.nomeUsuario());
 
-        if(optionalUsuario.isPresent()){
+        if (optionalUsuario.isPresent()) {
             throw new RegraDeNegocioException("Já existe uma conta cadastrada com esse email ou nome de usuário!");
         }
 
@@ -47,8 +48,8 @@ public class UsuariService {
 
     @Transactional
     public void verificarEmail(String codigo) {
-            Usuario usuario = usuarioRepository.findByToken(codigo).orElseThrow();
-            usuario.verificar();
+        Usuario usuario = usuarioRepository.findByToken(codigo).orElseThrow();
+        usuario.verificar();
     }
 
     public void desativarUsuario(Usuario usuario) {
@@ -61,6 +62,22 @@ public class UsuariService {
     public Usuario obterPerfil(Usuario usuario) {
 
         Usuario usuarioEncontrado = this.usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrue(usuario.getEmail()).orElseThrow();
+
+        return usuarioEncontrado;
+    }
+
+    public Usuario editarPerfil(DadosEditavelUsuario dados, String email) {
+
+        Usuario usuarioEncontrado = this.usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrue(email).orElseThrow();
+
+        if (!Strings.isBlank(dados.biografia()))
+            usuarioEncontrado.setBiografia(dados.biografia());
+
+        if (!Strings.isBlank(dados.miniBiografia()))
+            usuarioEncontrado.setMiniBiografia(dados.miniBiografia());
+
+        if (!Strings.isBlank(dados.nomeCompleto()))
+            usuarioEncontrado.setNomeCompleto(dados.nomeCompleto());
 
         return usuarioEncontrado;
     }

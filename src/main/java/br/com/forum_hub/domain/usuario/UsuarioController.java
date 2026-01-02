@@ -57,4 +57,16 @@ public class UsuarioController {
         return ResponseEntity.ok().body(new DadosListagemUsuario(usuarioEncontrado));
     }
 
+
+    @PutMapping("/perfil")
+    public ResponseEntity editarPerfil(
+            @RequestBody @Valid DadosEditavelUsuario dados,
+            @AuthenticationPrincipal Usuario usuario
+    ){
+        Usuario usuarioEditado = this.usuarioService.editarPerfil(dados, usuario.getEmail());
+
+        return ResponseEntity.ok().body(new DadosListagemUsuario(usuarioEditado));
+
+    }
+
 }
