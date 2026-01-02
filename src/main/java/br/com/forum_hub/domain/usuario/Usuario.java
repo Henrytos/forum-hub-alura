@@ -104,4 +104,9 @@ public class Usuario implements UserDetails {
         if(this.getExpiracaoToken().isBefore(LocalDateTime.now()))
             throw new RegraDeNegocioException("Token expirou");
     }
+
+    public void invalidarToken() {
+        this.token = null;
+        this.expiracaoToken = null;
+    }
 }

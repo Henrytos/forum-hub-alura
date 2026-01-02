@@ -95,13 +95,15 @@ public class UsuariService {
     }
 
     public void alterarSenha(String codigo, DadosAlterarSenha dados) {
-        Usuario  usuario = this.usuarioRepository.findByToken(codigo).orElseThrow();
+        Usuario usuario = this.usuarioRepository.findByToken(codigo).orElseThrow();
         usuario.validarExpiracaoToken();
 
-        if(!dados.senha().equals(dados.confirmacaoSenha()))
+        if (!dados.senha().equals(dados.confirmacaoSenha()))
             throw new RegraDeNegocioException("Senha não bate com a confirmação!");
 
         String senhaCriptografada = this.passwordEncoder.encode(dados.senha());
         usuario.setSenha(senhaCriptografada);
-        }
+        usuario.invalidarToken();
+
+    }
 }
