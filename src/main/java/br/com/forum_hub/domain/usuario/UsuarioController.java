@@ -13,6 +13,8 @@ public class UsuarioController {
 
     private final UsuariService usuarioService;
 
+
+
     public UsuarioController(UsuariService usuarioService) {
         this.usuarioService = usuarioService;
     }
@@ -69,4 +71,25 @@ public class UsuarioController {
 
     }
 
+
+    @Transactional
+    @PostMapping("/solicitar-senha")
+    public ResponseEntity solicitarMudancaDeSenha(
+            @RequestBody @Valid DadosSolicitarSenha dados
+    ){
+        this.usuarioService.solicitarMudancaDeSenha(dados.email());
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Transactional
+    @PatchMapping("/alterar-senha")
+    public ResponseEntity<String> alterSenha(
+            @RequestParam String codigo,
+            @RequestBody @Valid DadosAlterarSenha dados
+    ){
+        this.usuarioService.alterarSenha(codigo, dados);
+
+        return ResponseEntity.ok("Senha alterada com sucesso");
+    }
 }

@@ -1,5 +1,6 @@
 package br.com.forum_hub.domain.usuario;
 
+import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,9 +46,13 @@ public class Usuario implements UserDetails {
         this.biografia = dados.biografia();
         this.miniBiografia = dados.miniBiografia();
 
+        this.gerarToken();
+        this.verificado = false;
+    }
+
+    public void gerarToken(){
         this.token = UUID.randomUUID().toString();
         this.expiracaoToken = LocalDateTime.now().plusMinutes(30);
-        this.verificado = false;
     }
 
     @Override
@@ -93,5 +98,10 @@ public class Usuario implements UserDetails {
 
     public void inativar() {
         this.verificado = false;
+    }
+
+    public void validarExpiracaoToken(){
+        if(this.getExpiracaoToken().isBefore(LocalDateTime.now()))
+            throw new RegraDeNegocioException("Token expirou");
     }
 }

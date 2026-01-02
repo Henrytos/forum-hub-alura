@@ -54,4 +54,16 @@ public class EmailService {
     private String gerarConteudoEmail(String template, String nome, String url) {
         return template.replace("[[name]]", nome).replace("[[URL]]", url);
     }
+
+    public void enviarEmailDeSenha(Usuario usuario) {
+
+        String assunto = "Aqui está seu link para Alterar a senha";
+        String conteudo = gerarConteudoEmail("Olá [[name]],<br>"
+                + "Por favor clique no link abaixo para trocar sua senha:<br>"
+                + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFICAR</a></h3>"
+                + "Obrigado,<br>"
+                + "Fórum Hub :).", usuario.getNomeCompleto(), URL_SITE + "/alterar-senha?codigo=" + usuario.getToken());
+
+        enviarEmail(usuario.getUsername(), assunto, conteudo);
+    }
 }

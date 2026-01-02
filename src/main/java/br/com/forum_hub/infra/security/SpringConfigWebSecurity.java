@@ -40,7 +40,9 @@ public class SpringConfigWebSecurity {
                                                     "/atualizar-token",
                                                     "/login",
                                                     "/registrar",
-                                                    "/verificar-conta"
+                                                    "/verificar-conta",
+                                                    "/alterar-senha",
+                                                    "/solicitar-senha"
                                             }
                                     ).permitAll()
                                     .anyRequest().authenticated();
