@@ -3,6 +3,8 @@ package br.com.forum_hub.infra.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -65,5 +67,33 @@ public class SpringConfigWebSecurity {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    //    @Bean
+//    public RoleHierarchy hierarquia(){
+//        String hierarquia = """
+//                ROLE_ADMIN > ROLE_MODERADOR
+//                ROLE_MODERADOR > ROLE_INSTRUTOR
+//                ROLE_MODERADOR > ROLE_ESTUDANTE
+//                """;
+//
+//        return RoleHierarchyImpl.fromHierarchy(hierarquia);
+//    }
+
+    @Bean
+    public RoleHierarchy hierarquia() {
+        return RoleHierarchyImpl
+                .withRolePrefix("ROLE")
+                .role("ADMIN").implies("MODERADOR")
+                .role("MODERADOR").implies("INSTRUTOR", "ESTUDANTE")
+                .build();
+    }
+//
+//    @Bean
+//    public RoleHierarchy hierarquia() {
+//        return RoleHierarchyImpl
+//                .withDefaultRolePrefix()
+//                .role("ADMIN").implies("MODERADOR")
+//                .role("MODERADOR").implies("INSTRUTOR", "ESTUDANTE")
+//                .build();
+//    }
 
 }
