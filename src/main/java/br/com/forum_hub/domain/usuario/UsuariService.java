@@ -1,5 +1,8 @@
 package br.com.forum_hub.domain.usuario;
 
+import br.com.forum_hub.domain.perfil.Perfil;
+import br.com.forum_hub.domain.perfil.PerfilNome;
+import br.com.forum_hub.domain.perfil.PerfilRepostiroy;
 import br.com.forum_hub.infra.email.EmailService;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.transaction.Transactional;
@@ -9,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,11 +23,13 @@ public class UsuariService {
     private final UsuarioRepository usuarioRepository;
 
     private final EmailService emailService;
+    private final PerfilRepostiroy perfilRepository;
 
-    public UsuariService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository, EmailService emailService) {
+    public UsuariService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository, EmailService emailService, PerfilRepostiroy perfilRepository) {
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
         this.emailService = emailService;
+        this.perfilRepository = perfilRepository;
     }
 
 
@@ -43,7 +49,10 @@ public class UsuariService {
 
         var senhaEncriptada = passwordEncoder.encode(dados.senha());
 
-        var usuario = new Usuario(dados, senhaEncriptada);
+        Perfil perfilPadrao = this.perfilRepository.findByNome(PerfilNome.ESTUDANTE).orElseThrow();
+
+        var usuario = new Usuario(dados, senhaEncriptada, perfilPadrao);
+
         emailService.enviarEmailVerificacao(usuario);
         return usuarioRepository.save(usuario);
     }
@@ -105,5 +114,25 @@ public class UsuariService {
         usuario.setSenha(senhaCriptografada);
         usuario.invalidarToken();
 
+    }
+
+    @Transactional
+    public Usuario adicionarPerfil(Long id, @Valid DadosPefil dados) {
+        Usuario usuarioEncontrado = this.usuarioRepository.findById(id).orElseThrow();
+        Perfil perfilEncontrado = this.perfilRepository.findByNome(dados.perfilNome()).orElseThrow();
+
+        usuarioEncontrado.adicionarPerfil(perfilEncontrado);
+
+        return usuarioEncontrado;
+    }
+
+    @Transactional
+    public Usuario removerPerfil(Long id, @Valid DadosPefil dados) {
+        Usuario usuarioEncontrado = this.usuarioRepository.findById(id).orElseThrow();
+        Perfil perfilEncontrado = this.perfilRepository.findByNome(dados.perfilNome()).orElseThrow();
+
+        usuarioEncontrado.removerPerfil(perfilEncontrado);
+
+        return usuarioEncontrado;
     }
 }

@@ -1,5 +1,6 @@
 package br.com.forum_hub.domain.usuario;
 
+import br.com.forum_hub.domain.perfil.Perfil;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -37,8 +39,16 @@ public class Usuario implements UserDetails {
     private LocalDateTime expiracaoToken;
     private Boolean verificado;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "usuarios_perfies",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "perfil_id")
+    )
+    private List<Perfil> perfies = new ArrayList<>();
 
-    public Usuario(DadosCadastroUsuario dados, String senhaCriptografada) {
+
+    public Usuario(DadosCadastroUsuario dados, String senhaCriptografada, Perfil perfil) {
         this.nomeCompleto = dados.nomeCompleto();
         this.email = dados.email();
         this.senha = senhaCriptografada;
@@ -48,9 +58,10 @@ public class Usuario implements UserDetails {
 
         this.gerarToken();
         this.verificado = false;
+        this.perfies.add(perfil);
     }
 
-    public void gerarToken(){
+    public void gerarToken() {
         this.token = UUID.randomUUID().toString();
         this.expiracaoToken = LocalDateTime.now().plusMinutes(30);
     }
@@ -100,13 +111,24 @@ public class Usuario implements UserDetails {
         this.verificado = false;
     }
 
-    public void validarExpiracaoToken(){
-        if(this.getExpiracaoToken().isBefore(LocalDateTime.now()))
+    public void validarExpiracaoToken() {
+        if (this.getExpiracaoToken().isBefore(LocalDateTime.now()))
             throw new RegraDeNegocioException("Token expirou");
     }
 
     public void invalidarToken() {
         this.token = null;
         this.expiracaoToken = null;
+    }
+
+    public void adicionarPerfil(Perfil perfil) {
+        this.perfies.add(perfil);
+    }
+
+    public void removerPerfil(Perfil perfil) {
+        if(!this.perfies.contains(perfil))
+            throw new RegraDeNegocioException("Perfil não existe neste usuario");
+
+        this.perfies.remove(perfil);
     }
 }

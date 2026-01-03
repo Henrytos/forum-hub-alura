@@ -92,4 +92,27 @@ public class UsuarioController {
 
         return ResponseEntity.ok("Senha alterada com sucesso");
     }
+
+    @PatchMapping("/adicionar-perfil/{id}")
+    public ResponseEntity<DadosListagemUsuario> adicionarPerfil(
+            @PathVariable Long id,
+            @RequestBody @Valid DadosPefil dados
+    ){
+
+        Usuario usuarioAtualizado = usuarioService.adicionarPerfil(id, dados);
+
+        return ResponseEntity.ok(new DadosListagemUsuario(usuarioAtualizado));
+    }
+
+    @PatchMapping("/remover-perfil/{id}")
+    public ResponseEntity<DadosListagemUsuario> removerPerfil(
+            @PathVariable Long id,
+            @RequestBody @Valid DadosPefil dados
+    ){
+
+        Usuario usuarioAtualizado = usuarioService.removerPerfil(id, dados);
+
+        return ResponseEntity.ok(new DadosListagemUsuario(usuarioAtualizado));
+    }
+
 }
