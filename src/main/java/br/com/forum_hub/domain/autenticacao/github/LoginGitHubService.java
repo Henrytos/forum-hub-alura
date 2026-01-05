@@ -1,6 +1,7 @@
 package br.com.forum_hub.domain.autenticacao.github;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -30,10 +31,10 @@ public class LoginGitHubService {
         return "https://github.com/login/oauth/authorize?" +
                 "client_id=" + CLIENT_ID +
                 "&redirect_uri=" + REDIRECT_URI +
-                "&scope:read:user,user:email";
+                "&scope=read:user,user:email";
     }
 
-    public String obterToken(String code) {
+    private String obterToken(String code) {
         String resposta = restClient
                 .post()
                 .uri("https://github.com/login/oauth/access_token")
@@ -44,6 +45,24 @@ public class LoginGitHubService {
                         "redirect_uri", REDIRECT_URI,
                         "client_secret", CLIENT_SECRET_KEY,
                         "code", code))
+                .retrieve()
+                .body(Map.class)
+                .get("access_token").toString();
+
+        return resposta;
+    }
+
+    public String obterEmail(String code){
+        String token = this.obterToken(code);
+        System.out.println(token);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        String resposta = restClient
+                .get()
+                .uri("https://api.github.com/user/emails")
+                .headers(httpHeaders -> httpHeaders.addAll(headers))
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .body(String.class);
 
