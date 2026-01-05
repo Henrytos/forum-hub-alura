@@ -1,8 +1,16 @@
 package br.com.forum_hub.domain.autenticacao.github;
 
+import br.com.forum_hub.domain.autenticacao.DadosToken;
+import br.com.forum_hub.domain.usuario.Usuario;
+import br.com.forum_hub.domain.usuario.UsuarioRepository;
+import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -22,8 +30,11 @@ public class LoginGitHubService {
 
     private final RestClient restClient;
 
-    public LoginGitHubService(RestClient.Builder builder) {
+    private final UsuarioRepository usuarioRepository;
+
+    public LoginGitHubService(RestClient.Builder builder, UsuarioRepository usuarioRepository) {
         this.restClient = builder.build();
+        this.usuarioRepository = usuarioRepository;
     }
 
 
@@ -58,14 +69,28 @@ public class LoginGitHubService {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
 
-        String resposta = restClient
+        DadosEmail[] resposta = restClient
                 .get()
                 .uri("https://api.github.com/user/emails")
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .body(String.class);
+                .body(DadosEmail[].class);
 
-        return resposta;
+        for (DadosEmail dadosEmail : resposta) {
+            if(dadosEmail.primary() && dadosEmail.verified())
+                return dadosEmail.email();
+        }
+
+        throw new RegraDeNegocioException("Não tem conta aqui");
     }
+
+    public Usuario autenticarPorEmail(String email){
+        Usuario usuario = usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrue(email).orElseThrow();
+        Authentication authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        return usuario;
+        }
 }

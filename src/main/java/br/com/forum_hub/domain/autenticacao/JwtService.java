@@ -3,6 +3,7 @@ package br.com.forum_hub.domain.autenticacao;
 import br.com.forum_hub.domain.usuario.Usuario;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -12,9 +13,11 @@ import java.time.ZoneOffset;
 @Service
 public class JwtService {
 
+    @Value("${application.jwt.secret_key}")
+    private String JWT_SECRET_KEY;
 
     public String gerarToken(Usuario usuario) {
-        Algorithm algorithm = Algorithm.HMAC256("1234");
+        Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET_KEY);
 
         return JWT.create()
                 .withIssuer("Forum Hub")
@@ -24,7 +27,7 @@ public class JwtService {
     }
 
     public String gerarRefreshToken(Usuario usuario) {
-        Algorithm algorithm = Algorithm.HMAC256("1234");
+        Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET_KEY);
 
         return JWT.create()
                 .withIssuer("Forum Hub")
@@ -34,7 +37,7 @@ public class JwtService {
     }
 
     public String validarToken(String token) {
-        Algorithm algorithm = Algorithm.HMAC256("1234");
+        Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET_KEY);
 
         try {
             return JWT
