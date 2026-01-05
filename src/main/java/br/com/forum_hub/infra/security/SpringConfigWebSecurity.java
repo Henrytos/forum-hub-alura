@@ -52,7 +52,7 @@ public class SpringConfigWebSecurity {
 
                             req.requestMatchers(
                                                     "/atualizar-token",
-                                                    "/login",
+                                                    "/login/**",
                                                     "/registrar",
                                                     "/verificar-conta",
                                                     "/alterar-senha",

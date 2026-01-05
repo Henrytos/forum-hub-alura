@@ -1,9 +1,11 @@
-package br.com.forum_hub.domain.usuario;
+package br.com.forum_hub.controller;
 
 import br.com.forum_hub.domain.autenticacao.DadosAtualizarToken;
 import br.com.forum_hub.domain.autenticacao.DadosLogin;
 import br.com.forum_hub.domain.autenticacao.DadosToken;
 import br.com.forum_hub.domain.autenticacao.JwtService;
+import br.com.forum_hub.domain.usuario.Usuario;
+import br.com.forum_hub.domain.usuario.UsuarioRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
