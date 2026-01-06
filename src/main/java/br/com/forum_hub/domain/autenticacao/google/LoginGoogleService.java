@@ -6,6 +6,8 @@ import br.com.forum_hub.domain.autenticacao.github.DadosEmail;
 import br.com.forum_hub.domain.usuario.Usuario;
 import br.com.forum_hub.domain.usuario.UsuarioRepository;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -67,31 +69,15 @@ public class LoginGoogleService {
 
     public String obterEmail(String code) {
         String token = obterToken(code);
-        System.out.println(token);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-
-        DadosEmail[] resposta = restClient
-                .get()
-                .uri("https://api.github.com/user/emails")
-                .headers(httpHeaders -> httpHeaders.addAll(headers))
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .body(DadosEmail[].class);
-
-
-        for (DadosEmail dadosEmail : resposta) {
-            if (dadosEmail.primary() && dadosEmail.verified())
-                return dadosEmail.email();
-        }
-
-        throw new RegraDeNegocioException("Não tem conta aqui");
+        var decode = JWT.decode(token);
+        System.out.println(decode.getClaims());
+        return decode.getClaims().get("email").asString();
     }
 
 
     private String obterToken(String code) {
 
-        String resposta = restClient
+        String token = restClient
                 .post()
                 .uri("https://oauth2.googleapis.com/token")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -103,9 +89,10 @@ public class LoginGoogleService {
                         "code", code,
                         "grant_type", "authorization_code"))
                 .retrieve()
-                .body(String.class);
+                .body(Map.class)
+                .get("id_token").toString();
 
-        return resposta;
+        return token;
     }
 
 }
