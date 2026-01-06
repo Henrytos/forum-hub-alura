@@ -124,7 +124,7 @@ public class LoginGitHubService {
         throw new RegraDeNegocioException("Não tem conta aqui");
     }
 
-    public String obterEmail(String code, String token) {
+    public String obterEmail(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
 
@@ -149,7 +149,7 @@ public class LoginGitHubService {
     @Transactional
     public Usuario registrar(String code) {
         String token = obterToken(code, REGISTER_CLIENT_ID, REGISTER_REDIRECT_URI, REGISTER_CLIENT_SECRET_KEY);
-        String email = obterEmail(code, token);
+        String email = obterEmail(token);
         System.out.println(email);
 
         DadosUsuarioGitHub dados = this.obterUsuario(token);

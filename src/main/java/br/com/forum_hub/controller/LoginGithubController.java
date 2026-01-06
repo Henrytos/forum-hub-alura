@@ -22,11 +22,8 @@ public class LoginGithubController {
 
     private final LoginGitHubService loginGitHubService;
 
-    private final JwtService jwtService;
-
     public LoginGithubController(LoginGitHubService loginGitHubService, JwtService jwtService) {
         this.loginGitHubService = loginGitHubService;
-        this.jwtService = jwtService;
     }
 
     @GetMapping
@@ -65,5 +62,4 @@ public class LoginGithubController {
         Usuario usuario = this.loginGitHubService.registrar(code);
         return ResponseEntity.ok(new DadosListagemUsuario(usuario));
     }
-
 }
