@@ -1,5 +1,6 @@
 package br.com.forum_hub.domain.usuario;
 
+import br.com.forum_hub.domain.autenticacao.github.DadosUsuarioGitHub;
 import jakarta.validation.constraints.NotBlank;
 
 public record DadosCadastroUsuario(
@@ -11,4 +12,5 @@ public record DadosCadastroUsuario(
         String miniBiografia,
         String biografia
 ) {
+
 }

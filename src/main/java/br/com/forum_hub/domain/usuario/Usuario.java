@@ -1,5 +1,6 @@
 package br.com.forum_hub.domain.usuario;
 
+import br.com.forum_hub.domain.autenticacao.github.DadosUsuarioGitHub;
 import br.com.forum_hub.domain.perfil.Perfil;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.persistence.*;
@@ -55,6 +56,19 @@ public class Usuario implements UserDetails {
         this.nomeUsuario = dados.nomeUsuario();
         this.biografia = dados.biografia();
         this.miniBiografia = dados.miniBiografia();
+
+        this.gerarToken();
+        this.verificado = false;
+        this.perfies.add(perfil);
+    }
+
+    public Usuario(DadosUsuarioGitHub dados, String emailPrincipal,Perfil perfil){
+        this.nomeCompleto = dados.name();
+        this.email = emailPrincipal;
+        this.senha = "";
+        this.nomeUsuario = dados.login();
+        this.biografia = dados.bio();
+        this.miniBiografia = null;
 
         this.gerarToken();
         this.verificado = false;
