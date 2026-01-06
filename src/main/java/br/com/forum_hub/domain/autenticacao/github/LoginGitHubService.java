@@ -28,24 +28,24 @@ import java.util.Optional;
 public class LoginGitHubService {
 
     //    LOGIN
-    @Value("${application.client.id}")
+    @Value("${application.github.login.client.id}")
     private String CLIENT_ID;
 
-    @Value("${application.redirect_uri}")
+    @Value("${application.github.login.redirect_uri}")
     private String REDIRECT_URI;
 
-    @Value("${application.client.secret_key}")
+    @Value("${application.github.login.client.secret_key}")
     private String CLIENT_SECRET_KEY;
 
 //    REGISTER
 
-    @Value("${application.register_client.id}")
+    @Value("${application.github.register.client.id}")
     private String REGISTER_CLIENT_ID;
 
-    @Value("${application.register_client.redirect_uri}")
+    @Value("${application.github.register.redirect_uri}")
     private String REGISTER_REDIRECT_URI;
 
-    @Value("${application.register_client.secret_key}")
+    @Value("${application.github.register.client.secret_key}")
     private String REGISTER_CLIENT_SECRET_KEY;
 
 
