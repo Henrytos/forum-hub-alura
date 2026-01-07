@@ -4,6 +4,8 @@ import br.com.forum_hub.domain.autenticacao.github.DadosUsuarioGitHub;
 import br.com.forum_hub.domain.perfil.Perfil;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -68,12 +70,24 @@ public class Usuario implements UserDetails {
         this.senha = "";
         this.nomeUsuario = dados.login();
         this.biografia = dados.bio();
-        this.miniBiografia = null;
+        this.miniBiografia = "";
 
-        this.gerarToken();
-        this.verificado = false;
+        this.verificado = true;
         this.perfies.add(perfil);
     }
+
+    public Usuario(@Email String email, @NotBlank String nomeCompleto, Perfil perfil){
+        this.nomeCompleto = nomeCompleto;
+        this.email = email;
+        this.senha = "";
+        this.nomeUsuario = email;
+        this.biografia = "";
+        this.miniBiografia = "";
+
+        this.verificado = true;
+        this.perfies.add(perfil);
+    }
+
 
     public void gerarToken() {
         this.token = UUID.randomUUID().toString();

@@ -2,14 +2,9 @@ package br.com.forum_hub.domain.autenticacao.github;
 
 import br.com.forum_hub.domain.autenticacao.DadosToken;
 import br.com.forum_hub.domain.autenticacao.JwtService;
-import br.com.forum_hub.domain.perfil.Perfil;
-import br.com.forum_hub.domain.perfil.PerfilNome;
-import br.com.forum_hub.domain.perfil.PerfilRepostiroy;
-import br.com.forum_hub.domain.usuario.DadosCadastroUsuario;
-import br.com.forum_hub.domain.usuario.UsuariService;
+import br.com.forum_hub.domain.usuario.UsuarioService;
 import br.com.forum_hub.domain.usuario.Usuario;
 import br.com.forum_hub.domain.usuario.UsuarioRepository;
-import br.com.forum_hub.infra.email.EmailService;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class LoginGitHubService {
@@ -55,16 +49,14 @@ public class LoginGitHubService {
 
     private final JwtService jwtService;
 
-    private final PerfilRepostiroy perfilRepository;
+    private final UsuarioService usuarioService;
 
-    private final EmailService emailService;
 
-    public LoginGitHubService(RestClient.Builder builder, UsuarioRepository usuarioRepository, JwtService jwtService, UsuariService usuariService, PerfilRepostiroy perfilRepository, EmailService emailService) {
+    public LoginGitHubService(RestClient.Builder builder, UsuarioRepository usuarioRepository, JwtService jwtService, UsuarioService usuarioService) {
         this.restClient = builder.build();
         this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
-        this.perfilRepository = perfilRepository;
-        this.emailService = emailService;
+        this.usuarioService = usuarioService;
     }
 
 
@@ -149,27 +141,11 @@ public class LoginGitHubService {
     @Transactional
     public Usuario registrar(String code) {
         String token = obterToken(code, REGISTER_CLIENT_ID, REGISTER_REDIRECT_URI, REGISTER_CLIENT_SECRET_KEY);
-        String email = obterEmail(token);
-        System.out.println(email);
 
+        String email = obterEmail(token);
         DadosUsuarioGitHub dados = this.obterUsuario(token);
 
-        Optional<Usuario> optionalUsuario = usuarioRepository
-                .findByEmailIgnoreCaseOrNomeUsuarioIgnoreCaseAndVerificadoTrue(email, dados.login());
-
-        if (optionalUsuario.isPresent()) {
-            throw new RegraDeNegocioException("Já existe uma conta cadastrada com esse email ou nome de usuário!");
-        }
-
-        Perfil perfilPadrao = this.perfilRepository.findByNome(PerfilNome.ESTUDANTE).orElseThrow();
-
-        var usuario = new Usuario(dados, email, perfilPadrao);
-
-        usuario = usuarioRepository.save(usuario);
-
-        emailService.enviarEmailVerificacao(usuario);
-
-        return usuario;
+        return usuarioService.cadastrar(dados,email);
     }
 
     private DadosUsuarioGitHub obterUsuario(String token) {

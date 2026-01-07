@@ -11,11 +11,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping
 public class UsuarioController {
 
-    private final UsuariService usuarioService;
+    private final UsuarioService usuarioService;
 
 
 
-    public UsuarioController(UsuariService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
 

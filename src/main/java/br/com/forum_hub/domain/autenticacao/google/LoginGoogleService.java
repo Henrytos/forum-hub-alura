@@ -2,14 +2,11 @@ package br.com.forum_hub.domain.autenticacao.google;
 
 import br.com.forum_hub.domain.autenticacao.DadosToken;
 import br.com.forum_hub.domain.autenticacao.JwtService;
-import br.com.forum_hub.domain.autenticacao.github.DadosEmail;
 import br.com.forum_hub.domain.usuario.Usuario;
 import br.com.forum_hub.domain.usuario.UsuarioRepository;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -51,6 +48,7 @@ public class LoginGoogleService {
                 "&scope=https://www.googleapis.com/auth/userinfo.email" +
                 "&response_type=code";
     }
+
 
     public DadosToken logar(String code) {
         String email = this.obterEmail(code);
@@ -94,5 +92,6 @@ public class LoginGoogleService {
 
         return token;
     }
+
 
 }
