@@ -42,6 +42,9 @@ public class Usuario implements UserDetails {
     private LocalDateTime expiracaoToken;
     private Boolean verificado;
 
+    private String secret;
+    private Boolean a2fAtiva = false;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "usuarios_perfies",
@@ -64,7 +67,7 @@ public class Usuario implements UserDetails {
         this.perfies.add(perfil);
     }
 
-    public Usuario(DadosUsuarioGitHub dados, String emailPrincipal,Perfil perfil){
+    public Usuario(DadosUsuarioGitHub dados, @Email String emailPrincipal, Perfil perfil) {
         this.nomeCompleto = dados.name();
         this.email = emailPrincipal;
         this.senha = "";
@@ -76,7 +79,7 @@ public class Usuario implements UserDetails {
         this.perfies.add(perfil);
     }
 
-    public Usuario(@Email String email, @NotBlank String nomeCompleto, Perfil perfil){
+    public Usuario(@Email String email, @NotBlank String nomeCompleto, Perfil perfil) {
         this.nomeCompleto = nomeCompleto;
         this.email = email;
         this.senha = "";
@@ -154,7 +157,7 @@ public class Usuario implements UserDetails {
     }
 
     public void removerPerfil(Perfil perfil) {
-        if(!this.perfies.contains(perfil))
+        if (!this.perfies.contains(perfil))
             throw new RegraDeNegocioException("Perfil não existe neste usuario");
 
         this.perfies.remove(perfil);
@@ -162,5 +165,9 @@ public class Usuario implements UserDetails {
 
     public void ativar() {
         this.verificado = true;
+    }
+
+    public void gerarSecret(String secret) {
+        this.secret = secret;
     }
 }

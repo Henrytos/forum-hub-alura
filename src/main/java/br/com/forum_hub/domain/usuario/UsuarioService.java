@@ -6,6 +6,7 @@ import br.com.forum_hub.domain.perfil.PerfilNome;
 import br.com.forum_hub.domain.perfil.PerfilRepostiroy;
 import br.com.forum_hub.infra.email.EmailService;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
+import br.com.forum_hub.infra.security.totp.TotpService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.util.Strings;
@@ -24,12 +25,14 @@ public class UsuarioService {
 
     private final EmailService emailService;
     private final PerfilRepostiroy perfilRepository;
+    private final TotpService totpService;
 
-    public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository, EmailService emailService, PerfilRepostiroy perfilRepository) {
+    public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository, EmailService emailService, PerfilRepostiroy perfilRepository, TotpService totpService) {
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
         this.emailService = emailService;
         this.perfilRepository = perfilRepository;
+        this.totpService = totpService;
     }
 
 
@@ -194,5 +197,14 @@ public class UsuarioService {
             usuarioEncontrado.inativar();
         else
             throw new AccessDeniedException("Você não tem autorização para inativar esta conta");
+    }
+
+    @Transactional
+    public String gerarQrCode(Usuario logado) {
+        String secret = this.totpService.gerarSecret();
+        logado.gerarSecret(secret);
+        this.usuarioRepository.save(logado);
+
+        return this.totpService.gerarQrCode(logado);
     }
 }
