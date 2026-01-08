@@ -148,4 +148,16 @@ public class UsuarioService {
 
         return this.totpService.gerarQrCode(logado);
     }
+
+    public void ativarA2f(String codigo, Usuario logado) {
+
+        if(logado.a2fAtiva())
+            throw new RegraDeNegocioException("Já está ativa");
+
+        if(totpService.verificarCodigo(codigo, logado))
+            throw new RegraDeNegocioException("Codigo invalido");
+
+        logado.ativarA2f();
+        usuarioRepository.save(logado);
+    }
 }

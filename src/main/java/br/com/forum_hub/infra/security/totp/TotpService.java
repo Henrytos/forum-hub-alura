@@ -1,6 +1,9 @@
 package br.com.forum_hub.infra.security.totp;
 
 import br.com.forum_hub.domain.usuario.Usuario;
+import com.atlassian.onetime.core.TOTP;
+import com.atlassian.onetime.core.TOTPGenerator;
+import com.atlassian.onetime.model.TOTPSecret;
 import com.atlassian.onetime.service.RandomSecretProvider;
 import org.springframework.stereotype.Service;
 
@@ -18,5 +21,13 @@ public class TotpService {
         return """
                 otpauth://totp/%s:%s?secret=%s&issuer=%s
                 """.formatted(issuer, logado.getNomeUsuario(), logado.getSecret(), issuer);
+    }
+
+    public boolean verificarCodigo(String codigo, Usuario logado) {
+        var secretDecodificada = TOTPSecret.Companion.fromBase32EncodedString(logado.getSecret());
+        var codigoGerado = new TOTPGenerator().generateCurrent(secretDecodificada).getValue();
+
+        return codigo.equals(codigoGerado);
+
     }
 }

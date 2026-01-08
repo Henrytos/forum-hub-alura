@@ -31,7 +31,15 @@ public class A2fController {
         return ResponseEntity.ok(qrCode);
     }
 
+    @PatchMapping("/ativar-a2f")
+    public ResponseEntity<Void> ativarA2f(
+            @RequestParam String codigo,
+            @AuthenticationPrincipal Usuario logado
+    ){
+        usuarioService.ativarA2f(codigo, logado);
 
+        return ResponseEntity.noContent().build();
+    }
 
 //    @PatchMapping("ativar-a2f")
 //
