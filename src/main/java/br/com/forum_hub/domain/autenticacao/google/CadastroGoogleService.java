@@ -3,6 +3,7 @@ package br.com.forum_hub.domain.autenticacao.google;
 import br.com.forum_hub.domain.perfil.Perfil;
 import br.com.forum_hub.domain.perfil.PerfilNome;
 import br.com.forum_hub.domain.perfil.PerfilRepostiroy;
+import br.com.forum_hub.domain.usuario.RegistroService;
 import br.com.forum_hub.domain.usuario.Usuario;
 import br.com.forum_hub.domain.usuario.UsuarioService;
 import com.auth0.jwt.JWT;
@@ -18,6 +19,7 @@ import java.util.Map;
 @Service
 public class CadastroGoogleService {
 
+    private final RegistroService registroService;
     @Value("${application.google.login.client.id}")
     private String CLIENT_ID;
 
@@ -29,11 +31,9 @@ public class CadastroGoogleService {
 
     private final RestClient restClient;
 
-    private final UsuarioService usuarioService;
-
-    public CadastroGoogleService(RestClient.Builder builder, UsuarioService usuarioService) {
+    public CadastroGoogleService(RestClient.Builder builder, RegistroService registroService) {
         this.restClient = builder.build();
-        this.usuarioService = usuarioService;
+        this.registroService = registroService;
     }
 
 
@@ -80,6 +80,6 @@ public class CadastroGoogleService {
         System.out.println("email =" + email);
         System.out.println("nomeCompleto =" + nomeCompleto);
 
-        return usuarioService.cadastrar(email, nomeCompleto);
+        return registroService.cadastrar(email, nomeCompleto);
     }
 }

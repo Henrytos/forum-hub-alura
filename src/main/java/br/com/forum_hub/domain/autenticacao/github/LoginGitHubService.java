@@ -2,6 +2,7 @@ package br.com.forum_hub.domain.autenticacao.github;
 
 import br.com.forum_hub.domain.autenticacao.DadosToken;
 import br.com.forum_hub.domain.autenticacao.JwtService;
+import br.com.forum_hub.domain.usuario.RegistroService;
 import br.com.forum_hub.domain.usuario.UsuarioService;
 import br.com.forum_hub.domain.usuario.Usuario;
 import br.com.forum_hub.domain.usuario.UsuarioRepository;
@@ -49,14 +50,14 @@ public class LoginGitHubService {
 
     private final JwtService jwtService;
 
-    private final UsuarioService usuarioService;
+    private final RegistroService registroService;
 
 
-    public LoginGitHubService(RestClient.Builder builder, UsuarioRepository usuarioRepository, JwtService jwtService, UsuarioService usuarioService) {
+    public LoginGitHubService(RestClient.Builder builder, UsuarioRepository usuarioRepository, JwtService jwtService, RegistroService registroService) {
         this.restClient = builder.build();
         this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
-        this.usuarioService = usuarioService;
+        this.registroService = registroService;
     }
 
 
@@ -145,7 +146,7 @@ public class LoginGitHubService {
         String email = obterEmail(token);
         DadosUsuarioGitHub dados = this.obterUsuario(token);
 
-        return usuarioService.cadastrar(dados,email);
+        return registroService.cadastrar(dados,email);
     }
 
     private DadosUsuarioGitHub obterUsuario(String token) {
