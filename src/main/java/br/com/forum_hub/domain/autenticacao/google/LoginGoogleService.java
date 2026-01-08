@@ -62,7 +62,7 @@ public class LoginGoogleService {
         String token = this.jwtService.gerarToken(usuario);
         String refreshToken = this.jwtService.gerarRefreshToken(usuario);
 
-        return new DadosToken(token, refreshToken);
+        return new DadosToken(token, refreshToken, usuario.getA2fAtiva());
     }
 
     public String obterEmail(String code) {

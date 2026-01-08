@@ -56,7 +56,8 @@ public class SpringConfigWebSecurity {
                                                     "/registrar",
                                                     "/verificar-conta",
                                                     "/alterar-senha",
-                                                    "/solicitar-senha"
+                                                    "/solicitar-senha",
+                                                    "/verificar-a2f"
                                     ).permitAll()
                                     .anyRequest().authenticated();
                         }

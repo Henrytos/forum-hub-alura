@@ -1,5 +1,8 @@
 package br.com.forum_hub.domain.usuario;
 
+import br.com.forum_hub.domain.autenticacao.DadosLoginA2f;
+import br.com.forum_hub.domain.autenticacao.DadosToken;
+import br.com.forum_hub.domain.autenticacao.JwtService;
 import br.com.forum_hub.domain.autenticacao.github.DadosUsuarioGitHub;
 import br.com.forum_hub.domain.perfil.Perfil;
 import br.com.forum_hub.domain.perfil.PerfilNome;
@@ -11,6 +14,9 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +35,16 @@ public class UsuarioService {
 
     private final TotpService totpService;
 
-    public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository, EmailService emailService, PerfilRepostiroy perfilRepository, TotpService totpService) {
+    private final JwtService jwtService;
+
+
+    public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository, EmailService emailService, PerfilRepostiroy perfilRepository, TotpService totpService, JwtService jwtService) {
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
         this.emailService = emailService;
         this.perfilRepository = perfilRepository;
         this.totpService = totpService;
+        this.jwtService = jwtService;
     }
 
 
@@ -143,6 +153,7 @@ public class UsuarioService {
     @Transactional
     public String gerarQrCode(Usuario logado) {
         String secret = this.totpService.gerarSecret();
+
         logado.gerarSecret(secret);
         this.usuarioRepository.save(logado);
 
@@ -159,5 +170,28 @@ public class UsuarioService {
 
         logado.ativarA2f();
         usuarioRepository.save(logado);
+    }
+
+    public DadosToken efetuarLoginA2f(@Valid DadosLoginA2f dados) {
+        Usuario usuario = this.usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrue(dados.email()).orElseThrow();
+
+        if(!usuario.a2fAtiva())
+            throw new RegraDeNegocioException("Autenticação de 2 fatores não está ativo");
+
+        Boolean codigoValido = this.totpService.verificarCodigo(dados.codigo(), usuario);
+
+        if(!codigoValido)
+            throw new RegraDeNegocioException("Codigo Inválido");
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // geração token jwt
+        String token = this.jwtService.gerarToken(usuario);
+
+        String refreshToken = this.jwtService.gerarRefreshToken(usuario);
+
+        return new DadosToken(token, refreshToken, usuario.a2fAtiva());
     }
 }

@@ -176,6 +176,6 @@ public class LoginGitHubService {
         String token = this.jwtService.gerarToken(usuario);
         String refreshToken = this.jwtService.gerarRefreshToken(usuario);
 
-        return new DadosToken(token, refreshToken);
+        return new DadosToken(token, refreshToken, usuario.a2fAtiva());
     }
 }

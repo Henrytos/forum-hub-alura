@@ -1,11 +1,9 @@
 package br.com.forum_hub.controller;
 
-import br.com.forum_hub.domain.autenticacao.DadosAtualizarToken;
-import br.com.forum_hub.domain.autenticacao.DadosLogin;
-import br.com.forum_hub.domain.autenticacao.DadosToken;
-import br.com.forum_hub.domain.autenticacao.JwtService;
+import br.com.forum_hub.domain.autenticacao.*;
 import br.com.forum_hub.domain.usuario.Usuario;
 import br.com.forum_hub.domain.usuario.UsuarioRepository;
+import br.com.forum_hub.domain.usuario.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +23,13 @@ public class AutenticacaoController {
 
     private final JwtService jwtService;
 
-    public AutenticacaoController(AuthenticationManager authenticationManager, UsuarioRepository usuarioRepository, JwtService jwtService) {
+    private final UsuarioService usuarioService;
+
+    public AutenticacaoController(AuthenticationManager authenticationManager, UsuarioRepository usuarioRepository, JwtService jwtService, UsuarioService usuarioService) {
         this.authenticationManager = authenticationManager;
         this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
+        this.usuarioService = usuarioService;
     }
 
     @PostMapping("/login")
@@ -41,12 +42,26 @@ public class AutenticacaoController {
         // objeto de autenticação validado
         Authentication authentication = this.authenticationManager.authenticate(authenticationToken);
 
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+
+        if(usuario.a2fAtiva())
+            return ResponseEntity.ok(new DadosToken(null, null, true));
+
         // geração token jwt
-        String token = this.jwtService.gerarToken((Usuario) authentication.getPrincipal());
+        String token = this.jwtService.gerarToken(usuario);
 
-        String refreshToken = this.jwtService.gerarRefreshToken((Usuario) authentication.getPrincipal());
+        String refreshToken = this.jwtService.gerarRefreshToken(usuario);
 
-        return ResponseEntity.ok(new DadosToken(token, refreshToken));
+        return ResponseEntity.ok(new DadosToken(token, refreshToken, false));
+    }
+
+    @PostMapping("/verificar-a2f")
+    public ResponseEntity<DadosToken> verificarSegundoFator(
+            @RequestBody @Valid DadosLoginA2f dados
+    ){
+        DadosToken dadosToken = usuarioService.efetuarLoginA2f(dados);
+
+        return ResponseEntity.ok(dadosToken);
     }
 
 
@@ -64,7 +79,7 @@ public class AutenticacaoController {
         String token = this.jwtService.gerarToken(usuario);
         String refreshToken = this.jwtService.gerarRefreshToken(usuario);
 
-        return ResponseEntity.ok(new DadosToken(token, refreshToken));
+        return ResponseEntity.ok(new DadosToken(token, refreshToken, false));
     }
 
     @PostMapping("/logout")
